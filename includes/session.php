@@ -2,7 +2,7 @@
 if (session_status() == PHP_SESSION_NONE) {
     // 🔧 Set session lifetime and save location
     ini_set('session.gc_maxlifetime', 86400);
-    ini_set('session.save_path', '/tmp'); // ✅ Make sure PHP can save session here
+    ini_set('session.save_path', '/var/www/html/sessions'); // ✅ FORCE SAVE PATH
 
     // 🔐 Proper cross-domain cookie settings
     session_set_cookie_params([
