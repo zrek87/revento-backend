@@ -11,11 +11,12 @@ app = Flask(__name__)
 
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="revento_app"
+        host="i8gso08s0cgos8w4wokckwgc",  # internal Docker hostname
+        user="revento_user",
+        password="1qaz1qaz",
+        database="revento_db"
     )
+
 
 def get_user_data(user_uuid):
     conn = get_db_connection()
@@ -205,4 +206,5 @@ def recommend():
     return jsonify({"recommendations": recommendations})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000)
+
