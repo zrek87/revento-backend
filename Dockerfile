@@ -1,13 +1,15 @@
 FROM php:8.2-apache
 
-# Enable mod_rewrite (optional, for .htaccess support)
+# Install PDO MySQL driver
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Enable mod_rewrite (optional, for .htaccess)
 RUN a2enmod rewrite
 
-# Copy your app files into Apache's root directory
+# Copy your app into the web root
 COPY . /var/www/html/
 
-# Set permissions (optional but recommended)
-WORKDIR /var/www/html/
+# Set permissions (optional)
 RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
