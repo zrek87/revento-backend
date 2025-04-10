@@ -2,16 +2,14 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// ✅ Confirm it's executing
-echo "Running check_session.php...\n";
-
-// 🔍 Force debug to a writable path
+// ✅ Debug: write everything to /tmp/session_debug.txt
 $log_path = '/tmp/session_debug.txt';
 file_put_contents($log_path, "=== NEW REQUEST ===\n", FILE_APPEND);
 file_put_contents($log_path, "COOKIE: " . print_r($_COOKIE, true) . "\n", FILE_APPEND);
 
+// ✅ Start session properly
 if (session_status() == PHP_SESSION_NONE) {
-    ini_set('session.save_path', '/tmp'); // 👈 Ensure this is set
+    ini_set('session.save_path', '/tmp');
     session_start();
     file_put_contents($log_path, "SESSION STARTED\n", FILE_APPEND);
 }
@@ -20,23 +18,23 @@ file_put_contents($log_path, "SESSION ID: " . session_id() . "\n", FILE_APPEND);
 file_put_contents($log_path, "SESSION FILE: " . session_save_path() . "/sess_" . session_id() . "\n", FILE_APPEND);
 file_put_contents($log_path, "SESSION CONTENT: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
 
-// ✅ Stop the echo (so it won't interfere with JSON)
-ob_clean();
-
+// ✅ Include logic
 include('../../includes/session.php');
 include('../../includes/functions.php');
 
-header("Content-Type: application/json");
+// ✅ CORS headers
 header("Access-Control-Allow-Origin: http://ckkso0s04080wkgskwkowwso.217.65.145.182.sslip.io");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Content-Type: application/json");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
+// ✅ Timeout logic
 $absolute_timeout = 28800;
 $inactivity_timeout = 1800;
 
@@ -66,4 +64,3 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
 } else {
     sendJsonResponse(false, "Session expired.");
 }
-?>
