@@ -1,20 +1,28 @@
 <?php
-include('../../includes/session.php');
-include('../../includes/conn.php');
-include('../../includes/functions.php');
-
+// ✅ CORS headers (before any output)
 header("Access-Control-Allow-Origin: http://ckkso0s04080wkgskwkowwso.217.65.145.182.sslip.io");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 
-
+// ✅ Handle preflight request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
+// ✅ Cross-domain session cookie settings
+ini_set('session.cookie_samesite', 'None');
+ini_set('session.cookie_secure', '0'); // change to '1' if using HTTPS (sslip.io supports it)
+
+session_start();
+
+include('../../includes/session.php');
+include('../../includes/conn.php');
+include('../../includes/functions.php');
+
 $data = json_decode(file_get_contents("php://input"), true);
+
 if (json_last_error() !== JSON_ERROR_NONE || empty($data['email']) || empty($data['password'])) {
     sendJsonResponse(false, "Invalid request. Email and password are required.");
     exit;
@@ -28,14 +36,14 @@ if (!isValidEmail($email)) {
     exit;
 }
 
-//Rate Limiting: Prevent Brute Force Attacks
+// Rate Limiting
 $_SESSION['failed_attempts'] = ($_SESSION['failed_attempts'] ?? 0) + 1;
 if ($_SESSION['failed_attempts'] > 5) {
     sendJsonResponse(false, "Too many failed login attempts. Try again later.");
     exit;
 }
 
-//Fetch User Data
+// Fetch user
 $sql = "SELECT uuid, fullname, username, email, password, role FROM users WHERE email = :email";
 try {
     $stmt = $conn->prepare($sql);
@@ -61,27 +69,25 @@ try {
 
         $auth_token = bin2hex(random_bytes(16));
 
-        //Store Tokens Securely
+        // Set cookies for frontend awareness (optional)
         setcookie("auth_token", $auth_token, [
             "expires" => time() + 3600,
             "path" => "/",
-            "domain" => "localhost",
-            "secure" => false,
+            "domain" => ".217.65.145.182.sslip.io", // Allow all subdomains
+            "secure" => false, // change to true if using HTTPS
             "httponly" => true,
-            "samesite" => "Lax"
+            "samesite" => "None"
         ]);
 
-        //Store user role in a cookie
         setcookie("user_role", $user['role'], [
             "expires" => time() + 3600,
             "path" => "/",
-            "domain" => "localhost",
+            "domain" => ".217.65.145.182.sslip.io",
             "secure" => false,
             "httponly" => false,
-            "samesite" => "Lax"
+            "samesite" => "None"
         ]);
 
-        //Send Response
         sendJsonResponse(true, "Login successful!", [
             "user_uuid" => strtoupper($user_uuid),
             "fullname" => $user['fullname'],
@@ -94,5 +100,6 @@ try {
     }
 } catch (PDOException $e) {
     error_log("Database error: " . $e->getMessage());
+    http_response_code(500);
+    sendJsonResponse(false, "An error occurred during login.");
 }
-?>
