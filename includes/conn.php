@@ -1,5 +1,5 @@
 <?php
-$host = "127.0.0.1"; // or use Coolify’s internal hostname
+$host = "i8gso08s0cgos8w4wokckwgc"; // or use Coolify’s internal hostname
 $db_name = "revento_db";
 $username = "revento_user";
 $password = "1qaz1qaz";
