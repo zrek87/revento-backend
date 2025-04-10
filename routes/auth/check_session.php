@@ -2,31 +2,36 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// ✅ Safe log path (inside your app)
+// ✅ Debug file path
 $log_path = '/var/www/html/storage/session_debug.txt';
-if ($log_path) {
+
+// 🛡 Prevent accidental output before headers
+ob_start();
+
+// ✅ Log request details
+if (is_writable(dirname($log_path))) {
     file_put_contents($log_path, "=== NEW REQUEST ===\n", FILE_APPEND);
     file_put_contents($log_path, "COOKIE: " . print_r($_COOKIE, true) . "\n", FILE_APPEND);
 }
 
-// ✅ Session start (with safety)
+// ✅ Start PHP session safely
 if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.save_path', '/tmp');
     session_start();
-    if ($log_path) file_put_contents($log_path, "SESSION STARTED\n", FILE_APPEND);
+
+    if (is_writable(dirname($log_path))) {
+        file_put_contents($log_path, "SESSION STARTED\n", FILE_APPEND);
+        file_put_contents($log_path, "SESSION ID: " . session_id() . "\n", FILE_APPEND);
+        file_put_contents($log_path, "SESSION FILE: " . session_save_path() . "/sess_" . session_id() . "\n", FILE_APPEND);
+        file_put_contents($log_path, "SESSION CONTENT: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
+    }
 }
 
-if ($log_path) {
-    file_put_contents($log_path, "SESSION ID: " . session_id() . "\n", FILE_APPEND);
-    file_put_contents($log_path, "SESSION FILE: " . session_save_path() . "/sess_" . session_id() . "\n", FILE_APPEND);
-    file_put_contents($log_path, "SESSION CONTENT: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
-}
-
-// ✅ Now continue normal execution
+// ✅ Includes after session
 include('../../includes/session.php');
 include('../../includes/functions.php');
 
-// ✅ CORS headers
+// ✅ CORS & headers
 header("Access-Control-Allow-Origin: http://ckkso0s04080wkgskwkowwso.217.65.145.182.sslip.io");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -38,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// ✅ Session timeout check
+// ✅ Session expiration logic
 $absolute_timeout = 28800;
 $inactivity_timeout = 1800;
 
