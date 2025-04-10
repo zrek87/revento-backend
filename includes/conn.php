@@ -1,8 +1,9 @@
 <?php
-$host = "localhost";
-$db_name = "revento_app";
-$username = "root";
-$password = "";
+$host = "mysql-database-i8gso08s0cgos8w4wokckwgc";
+$db_name = "revento_db";
+$username = "revento_user";
+$password = "r34bHB1mKycSlxxXK7qw6MhQOhpkCPXfvK6bUBvEVWEdhecIXXTbFEJewilC1i8n";
+
 
 try {
     $conn = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8", $username, $password, [
