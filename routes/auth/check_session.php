@@ -3,7 +3,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // ✅ Debug: write everything to /tmp/session_debug.txt
-$log_path = '/tmp/session_debug.txt';
+$log_path = __DIR__ . '/../../storage/session_debug.txt';
 file_put_contents($log_path, "=== NEW REQUEST ===\n", FILE_APPEND);
 file_put_contents($log_path, "COOKIE: " . print_r($_COOKIE, true) . "\n", FILE_APPEND);
 
