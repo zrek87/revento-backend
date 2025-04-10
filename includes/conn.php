@@ -2,7 +2,7 @@
 $host = "mysql-database-i8gso08s0cgos8w4wokckwgc";
 $db_name = "revento_db";
 $username = "revento_user";
-$password = "r34bHB1mKycSlxxXK7qw6MhQOhpkCPXfvK6bUBvEVWEdhecIXXTbFEJewilC1i8n";
+$password = "1qaz1qaz";
 
 
 try {
