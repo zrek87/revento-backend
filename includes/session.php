@@ -2,14 +2,14 @@
 if (session_status() == PHP_SESSION_NONE) {
     ini_set('session.gc_maxlifetime', 86400);
 
-    // 💡 Force cross-domain compatibility
+    
     session_set_cookie_params([
         'lifetime' => 86400,
         'path' => '/',
-        'domain' => '.217.65.145.182.sslip.io', // Allows all subdomains
-        'secure' => false, // ❗ Set to true if/when you switch to HTTPS
+        'domain' => '.217.65.145.182.sslip.io', 
+        'secure' => false, 
         'httponly' => true,
-        'samesite' => 'None' // 🔥 Required for cross-origin cookies
+        'samesite' => 'None' 
     ]);
 
     session_start();
@@ -20,7 +20,7 @@ if (!isset($_SESSION['loggedin'])) {
     $_SESSION['loggedin'] = false;
 }
 
-// 🔒 Timeout Handling
+// Timeout Handling
 $timeout_duration = 1800;      // 30 min inactivity
 $absolute_timeout = 28800;     // 8 hours absolute
 
