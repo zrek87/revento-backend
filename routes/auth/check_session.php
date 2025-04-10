@@ -3,7 +3,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // ✅ Safe log path (inside your app)
-$log_path = realpath(__DIR__ . '/../../storage') . '/session_debug.txt';
+$log_path = '/var/www/html/storage/session_debug.txt';
 if ($log_path) {
     file_put_contents($log_path, "=== NEW REQUEST ===\n", FILE_APPEND);
     file_put_contents($log_path, "COOKIE: " . print_r($_COOKIE, true) . "\n", FILE_APPEND);
