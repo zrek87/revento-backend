@@ -1,4 +1,10 @@
 <?php
+
+file_put_contents('/tmp/session_debug.txt', "Incoming SESSION: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
+file_put_contents('/tmp/session_debug.txt', "SESSION ID: " . session_id() . "\n", FILE_APPEND);
+file_put_contents('/tmp/session_debug.txt', "SESSION FILE: " . session_save_path() . "/sess_" . session_id() . "\n", FILE_APPEND);
+file_put_contents('/tmp/session_debug.txt', "COOKIES: " . print_r($_COOKIE, true) . "\n", FILE_APPEND);
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
