@@ -2,23 +2,27 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// ✅ Debug: write everything to /tmp/session_debug.txt
-$log_path = __DIR__ . '/../../storage/session_debug.txt';
-file_put_contents($log_path, "=== NEW REQUEST ===\n", FILE_APPEND);
-file_put_contents($log_path, "COOKIE: " . print_r($_COOKIE, true) . "\n", FILE_APPEND);
-
-// ✅ Start session properly
-if (session_status() == PHP_SESSION_NONE) {
-    ini_set('session.save_path', '/tmp');
-    session_start();
-    file_put_contents($log_path, "SESSION STARTED\n", FILE_APPEND);
+// ✅ Safe log path (inside your app)
+$log_path = realpath(__DIR__ . '/../../storage') . '/session_debug.txt';
+if ($log_path) {
+    file_put_contents($log_path, "=== NEW REQUEST ===\n", FILE_APPEND);
+    file_put_contents($log_path, "COOKIE: " . print_r($_COOKIE, true) . "\n", FILE_APPEND);
 }
 
-file_put_contents($log_path, "SESSION ID: " . session_id() . "\n", FILE_APPEND);
-file_put_contents($log_path, "SESSION FILE: " . session_save_path() . "/sess_" . session_id() . "\n", FILE_APPEND);
-file_put_contents($log_path, "SESSION CONTENT: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
+// ✅ Session start (with safety)
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.save_path', '/tmp');
+    session_start();
+    if ($log_path) file_put_contents($log_path, "SESSION STARTED\n", FILE_APPEND);
+}
 
-// ✅ Include logic
+if ($log_path) {
+    file_put_contents($log_path, "SESSION ID: " . session_id() . "\n", FILE_APPEND);
+    file_put_contents($log_path, "SESSION FILE: " . session_save_path() . "/sess_" . session_id() . "\n", FILE_APPEND);
+    file_put_contents($log_path, "SESSION CONTENT: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
+}
+
+// ✅ Now continue normal execution
 include('../../includes/session.php');
 include('../../includes/functions.php');
 
@@ -34,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// ✅ Timeout logic
+// ✅ Session timeout check
 $absolute_timeout = 28800;
 $inactivity_timeout = 1800;
 
@@ -42,7 +46,7 @@ if (!isset($_SESSION['session_start_time'])) {
     $_SESSION['session_start_time'] = time();
 }
 
-if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+if (!empty($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     $current_time = time();
     $session_duration = $current_time - $_SESSION['session_start_time'];
     $inactive_duration = $current_time - ($_SESSION['last_activity'] ?? $current_time);
@@ -57,9 +61,9 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
     $_SESSION['last_activity'] = $current_time;
 
     sendJsonResponse(true, "Session is active", [
-        "user_uuid" => $_SESSION['user_uuid'],
-        "username" => $_SESSION['username'],
-        "role" => $_SESSION['role']
+        "user_uuid" => $_SESSION['user_uuid'] ?? null,
+        "username" => $_SESSION['username'] ?? null,
+        "role" => $_SESSION['role'] ?? null
     ]);
 } else {
     sendJsonResponse(false, "Session expired.");
