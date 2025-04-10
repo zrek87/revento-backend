@@ -1,30 +1,32 @@
 <?php
-echo "✅ PHP is running";
-exit;
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// 🔍 Log everything immediately — BEFORE includes or headers
-file_put_contents('/tmp/session_debug.txt', "=== NEW REQUEST ===\n", FILE_APPEND);
-file_put_contents('/tmp/session_debug.txt', "COOKIE: " . print_r($_COOKIE, true) . "\n", FILE_APPEND);
+// ✅ Confirm it's executing
+echo "Running check_session.php...\n";
 
-// Safe fallback if session isn’t started yet
+// 🔍 Force debug to a writable path
+$log_path = '/tmp/session_debug.txt';
+file_put_contents($log_path, "=== NEW REQUEST ===\n", FILE_APPEND);
+file_put_contents($log_path, "COOKIE: " . print_r($_COOKIE, true) . "\n", FILE_APPEND);
+
 if (session_status() == PHP_SESSION_NONE) {
-    ini_set('session.save_path', '/tmp'); // Make sure it uses valid path
+    ini_set('session.save_path', '/tmp'); // 👈 Ensure this is set
     session_start();
-    file_put_contents('/tmp/session_debug.txt', "SESSION STARTED\n", FILE_APPEND);
+    file_put_contents($log_path, "SESSION STARTED\n", FILE_APPEND);
 }
 
-// Now log session values and session file
-file_put_contents('/tmp/session_debug.txt', "SESSION ID: " . session_id() . "\n", FILE_APPEND);
-file_put_contents('/tmp/session_debug.txt', "SESSION PATH: " . session_save_path() . "\n", FILE_APPEND);
-file_put_contents('/tmp/session_debug.txt', "SESSION CONTENT: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
+file_put_contents($log_path, "SESSION ID: " . session_id() . "\n", FILE_APPEND);
+file_put_contents($log_path, "SESSION FILE: " . session_save_path() . "/sess_" . session_id() . "\n", FILE_APPEND);
+file_put_contents($log_path, "SESSION CONTENT: " . print_r($_SESSION, true) . "\n", FILE_APPEND);
+
+// ✅ Stop the echo (so it won't interfere with JSON)
+ob_clean();
 
 include('../../includes/session.php');
 include('../../includes/functions.php');
 
-// ✅ CORS headers
+header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: http://ckkso0s04080wkgskwkowwso.217.65.145.182.sslip.io");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -35,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// 🔒 Timeout logic
 $absolute_timeout = 28800;
 $inactivity_timeout = 1800;
 
